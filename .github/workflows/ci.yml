@@ -15,28 +15,13 @@ jobs:
       path: tests/fixtures/valid-unity-project
       checker-ref: ${{ github.sha }}
 
-  invalid-fixture:
-    name: Reject invalid fixture
+  invalid-fixtures:
+    name: Reject invalid fixtures
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Invalid project should fail
+      - name: Invalid fixtures should fail
         shell: bash
-        run: |
-          set +e
-          scripts/unity-project-check.sh --path tests/fixtures/not-unity-project > check-output.txt 2>&1
-          status=$?
-          set -e
-
-          cat check-output.txt
-
-          if [[ "$status" -eq 0 ]]; then
-            echo "Expected invalid fixture to fail."
-            exit 1
-          fi
-
-          grep -q "Missing required directory: Assets" check-output.txt
-          grep -q "Missing required file: Packages/manifest.json" check-output.txt
-          grep -q "Missing required file: ProjectSettings/ProjectVersion.txt" check-output.txt
+        run: bash tests/run-negative-tests.sh
