@@ -19,7 +19,7 @@ expect_failure() {
   local status=$?
   set -e
 
-  cat "$output"
+  sed 's#^::#: :#' "$output"
 
   if [[ "$status" -eq 0 ]]; then
     echo "Expected $name to fail."
