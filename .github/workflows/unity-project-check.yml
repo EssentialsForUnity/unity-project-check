@@ -33,6 +33,21 @@ on:
         required: false
         type: boolean
         default: true
+      check-gitignore:
+        description: Verify common generated files are ignored.
+        required: false
+        type: boolean
+        default: true
+      check-large-files:
+        description: Fail on oversized tracked files.
+        required: false
+        type: boolean
+        default: true
+      max-file-size-mb:
+        description: Maximum tracked file size in MB.
+        required: false
+        type: string
+        default: "100"
       checker-repository:
         description: Repository containing the checker implementation.
         required: false
@@ -75,6 +90,21 @@ on:
         required: false
         type: boolean
         default: true
+      check-gitignore:
+        description: Verify common generated files are ignored.
+        required: false
+        type: boolean
+        default: true
+      check-large-files:
+        description: Fail on oversized tracked files.
+        required: false
+        type: boolean
+        default: true
+      max-file-size-mb:
+        description: Maximum tracked file size in MB.
+        required: false
+        type: string
+        default: "100"
       checker-repository:
         description: Repository containing the checker implementation.
         required: false
@@ -120,4 +150,7 @@ jobs:
             --require-packages "${{ inputs.require-packages }}" \
             --require-project-settings "${{ inputs.require-project-settings }}" \
             --check-package-lock "${{ inputs.check-package-lock }}" \
-            --fail-on-tracked-generated "${{ inputs.fail-on-tracked-generated }}"
+            --fail-on-tracked-generated "${{ inputs.fail-on-tracked-generated }}" \
+            --check-gitignore "${{ inputs.check-gitignore }}" \
+            --check-large-files "${{ inputs.check-large-files }}" \
+            --max-file-size-mb "${{ inputs.max-file-size-mb }}"

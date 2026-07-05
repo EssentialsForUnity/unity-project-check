@@ -26,6 +26,18 @@ inputs:
     description: Fail when generated Unity or IDE files are tracked by git.
     required: false
     default: "true"
+  check-gitignore:
+    description: Verify common generated files are ignored.
+    required: false
+    default: "true"
+  check-large-files:
+    description: Fail on oversized tracked files.
+    required: false
+    default: "true"
+  max-file-size-mb:
+    description: Maximum tracked file size in MB.
+    required: false
+    default: "100"
 
 runs:
   using: composite
@@ -39,4 +51,7 @@ runs:
           --require-packages "${{ inputs.require-packages }}" \
           --require-project-settings "${{ inputs.require-project-settings }}" \
           --check-package-lock "${{ inputs.check-package-lock }}" \
-          --fail-on-tracked-generated "${{ inputs.fail-on-tracked-generated }}"
+          --fail-on-tracked-generated "${{ inputs.fail-on-tracked-generated }}" \
+          --check-gitignore "${{ inputs.check-gitignore }}" \
+          --check-large-files "${{ inputs.check-large-files }}" \
+          --max-file-size-mb "${{ inputs.max-file-size-mb }}"

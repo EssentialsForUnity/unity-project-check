@@ -62,6 +62,9 @@ jobs:
       require-project-settings: true
       check-package-lock: true
       fail-on-tracked-generated: true
+      check-gitignore: true
+      check-large-files: true
+      max-file-size-mb: 100
       checker-repository: EssentialsForUnity/unity-project-check
       checker-ref: main
 ```
@@ -77,6 +80,8 @@ By default the checker verifies:
 - `ProjectSettings/` exists.
 - `ProjectSettings/ProjectVersion.txt` exists and contains `m_EditorVersion:`.
 - Common Unity-generated and IDE files are not tracked in git.
+- Common Unity-generated and IDE files are covered by `.gitignore`.
+- Tracked files do not exceed the configured size limit.
 
 The tracked generated-file check covers:
 
@@ -84,6 +89,8 @@ The tracked generated-file check covers:
 Library/, Temp/, Obj/, Build/, Builds/, Logs/, UserSettings/, .idea/, .vs/,
 *.csproj, *.sln, *.unityproj
 ```
+
+The `.gitignore` coverage check uses `git check-ignore` against representative generated paths such as `Library/`, `Temp/`, `.idea/`, `.vs/`, `*.csproj`, and `*.sln`. The large-file check defaults to `100 MB`.
 
 ## What This Does Not Do
 

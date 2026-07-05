@@ -14,6 +14,9 @@ Options:
   --check-package-lock <true|false>     Validate packages-lock.json when present. Default: true
   --fail-on-tracked-generated <true|false>
                                         Fail when generated Unity or IDE files are tracked. Default: true
+  --check-gitignore <true|false>        Verify common generated files are ignored. Default: true
+  --check-large-files <true|false>      Fail on oversized tracked files. Default: true
+  --max-file-size-mb <number>           Maximum tracked file size in MB. Default: 100
   -h, --help                            Show this help.
 USAGE
 }
@@ -24,6 +27,9 @@ require_packages="true"
 require_project_settings="true"
 check_package_lock="true"
 fail_on_tracked_generated="true"
+check_gitignore="true"
+check_large_files="true"
+max_file_size_mb="100"
 
 normalize_bool() {
   case "$1" in
@@ -60,6 +66,22 @@ while [[ $# -gt 0 ]]; do
       ;;
     --fail-on-tracked-generated)
       fail_on_tracked_generated="$(normalize_bool "${2:?Missing value for --fail-on-tracked-generated}")"
+      shift 2
+      ;;
+    --check-gitignore)
+      check_gitignore="$(normalize_bool "${2:?Missing value for --check-gitignore}")"
+      shift 2
+      ;;
+    --check-large-files)
+      check_large_files="$(normalize_bool "${2:?Missing value for --check-large-files}")"
+      shift 2
+      ;;
+    --max-file-size-mb)
+      max_file_size_mb="${2:?Missing value for --max-file-size-mb}"
+      if ! [[ "$max_file_size_mb" =~ ^[0-9]+$ ]] || [[ "$max_file_size_mb" -lt 1 ]]; then
+        echo "Invalid max file size in MB: $max_file_size_mb" >&2
+        exit 2
+      fi
       shift 2
       ;;
     -h|--help)
@@ -215,6 +237,71 @@ else
       fi
     else
       notice "Skipping tracked generated-file check because this path is not inside a git work tree."
+    fi
+  fi
+
+  if [[ "$check_gitignore" == "true" ]]; then
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      gitignore_failures=()
+      while IFS='|' read -r label probe_path; do
+        if ! git check-ignore --no-index -q "$probe_path"; then
+          gitignore_failures+=("$label ($probe_path)")
+        fi
+      done <<'EOF'
+Unity Library|Library/unity-project-check.tmp
+Unity Temp|Temp/unity-project-check.tmp
+Unity Obj|Obj/unity-project-check.tmp
+Unity Build|Build/unity-project-check.tmp
+Unity Builds|Builds/unity-project-check.tmp
+Unity Logs|Logs/unity-project-check.tmp
+Unity UserSettings|UserSettings/unity-project-check.tmp
+JetBrains IDE settings|.idea/workspace.xml
+Visual Studio cache|.vs/cache.db
+Generated C# project|Generated.csproj
+Generated solution|Generated.sln
+Generated Unity project|Generated.unityproj
+EOF
+
+      if [[ "${#gitignore_failures[@]}" -gt 0 ]]; then
+        error ".gitignore is missing common Unity or IDE generated-file coverage."
+        printf '%s\n' "${gitignore_failures[@]}"
+      fi
+    else
+      notice "Skipping .gitignore coverage check because this path is not inside a git work tree."
+    fi
+  fi
+
+  if [[ "$check_large_files" == "true" ]]; then
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      large_files="$(
+        python3 - "$max_file_size_mb" <<'PY'
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+limit_mb = int(sys.argv[1])
+limit_bytes = limit_mb * 1024 * 1024
+
+tracked = subprocess.check_output(["git", "ls-files", "-z"])
+for raw in tracked.split(b"\0"):
+    if not raw:
+        continue
+    path = Path(raw.decode("utf-8", errors="surrogateescape"))
+    if not path.is_file():
+        continue
+    size = path.stat().st_size
+    if size > limit_bytes:
+        print(f"{size} bytes\t{path.as_posix()}")
+PY
+      )"
+
+      if [[ -n "$large_files" ]]; then
+        error "Tracked files exceed ${max_file_size_mb} MB. Move large binaries to Git LFS or remove generated artifacts."
+        printf '%s\n' "$large_files"
+      fi
+    else
+      notice "Skipping large tracked-file check because this path is not inside a git work tree."
     fi
   fi
 fi
