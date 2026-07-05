@@ -1,0 +1,42 @@
+name: Unity Project Check
+description: Validate basic Unity project repository structure.
+
+inputs:
+  path:
+    description: Repository-relative Unity project path.
+    required: false
+    default: .
+  require-assets:
+    description: Require an Assets directory.
+    required: false
+    default: "true"
+  require-packages:
+    description: Require Packages directory and Packages/manifest.json.
+    required: false
+    default: "true"
+  require-project-settings:
+    description: Require ProjectSettings directory and ProjectVersion.txt.
+    required: false
+    default: "true"
+  check-package-lock:
+    description: Validate Packages/packages-lock.json when present.
+    required: false
+    default: "true"
+  fail-on-tracked-generated:
+    description: Fail when generated Unity or IDE files are tracked by git.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Run Unity project check
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/scripts/unity-project-check.sh" \
+          --path "${{ inputs.path }}" \
+          --require-assets "${{ inputs.require-assets }}" \
+          --require-packages "${{ inputs.require-packages }}" \
+          --require-project-settings "${{ inputs.require-project-settings }}" \
+          --check-package-lock "${{ inputs.check-package-lock }}" \
+          --fail-on-tracked-generated "${{ inputs.fail-on-tracked-generated }}"

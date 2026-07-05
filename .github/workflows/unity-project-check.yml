@@ -1,0 +1,123 @@
+name: Unity Project Check
+
+on:
+  workflow_call:
+    inputs:
+      path:
+        description: Repository-relative Unity project path.
+        required: false
+        type: string
+        default: .
+      require-assets:
+        description: Require an Assets directory.
+        required: false
+        type: boolean
+        default: true
+      require-packages:
+        description: Require Packages directory and Packages/manifest.json.
+        required: false
+        type: boolean
+        default: true
+      require-project-settings:
+        description: Require ProjectSettings directory and ProjectVersion.txt.
+        required: false
+        type: boolean
+        default: true
+      check-package-lock:
+        description: Validate Packages/packages-lock.json when present.
+        required: false
+        type: boolean
+        default: true
+      fail-on-tracked-generated:
+        description: Fail when generated Unity or IDE files are tracked by git.
+        required: false
+        type: boolean
+        default: true
+      checker-repository:
+        description: Repository containing the checker implementation.
+        required: false
+        type: string
+        default: EssentialsForUnity/unity-project-check
+      checker-ref:
+        description: Ref to check out for the checker implementation.
+        required: false
+        type: string
+        default: main
+  workflow_dispatch:
+    inputs:
+      path:
+        description: Repository-relative Unity project path.
+        required: false
+        type: string
+        default: .
+      require-assets:
+        description: Require an Assets directory.
+        required: false
+        type: boolean
+        default: true
+      require-packages:
+        description: Require Packages directory and Packages/manifest.json.
+        required: false
+        type: boolean
+        default: true
+      require-project-settings:
+        description: Require ProjectSettings directory and ProjectVersion.txt.
+        required: false
+        type: boolean
+        default: true
+      check-package-lock:
+        description: Validate Packages/packages-lock.json when present.
+        required: false
+        type: boolean
+        default: true
+      fail-on-tracked-generated:
+        description: Fail when generated Unity or IDE files are tracked by git.
+        required: false
+        type: boolean
+        default: true
+      checker-repository:
+        description: Repository containing the checker implementation.
+        required: false
+        type: string
+        default: EssentialsForUnity/unity-project-check
+      checker-ref:
+        description: Ref to check out for the checker implementation.
+        required: false
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    name: Check Unity project structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          submodules: false
+
+      - name: Checkout checker
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.checker-repository }}
+          ref: ${{ inputs.checker-ref }}
+          path: .unity-project-check
+          lfs: false
+          submodules: false
+
+      - name: Run Unity project check
+        shell: bash
+        run: |
+          .unity-project-check/scripts/unity-project-check.sh \
+            --path "${{ inputs.path }}" \
+            --require-assets "${{ inputs.require-assets }}" \
+            --require-packages "${{ inputs.require-packages }}" \
+            --require-project-settings "${{ inputs.require-project-settings }}" \
+            --check-package-lock "${{ inputs.check-package-lock }}" \
+            --fail-on-tracked-generated "${{ inputs.fail-on-tracked-generated }}"
