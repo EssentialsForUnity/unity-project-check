@@ -52,7 +52,7 @@ on:
         description: Repository containing the checker implementation.
         required: false
         type: string
-        default: EssentialsForUnity/unity-project-check
+        default: EssentialsForUnity/workflow-unity-project
       checker-ref:
         description: Ref to check out for the checker implementation.
         required: false
@@ -109,7 +109,7 @@ on:
         description: Repository containing the checker implementation.
         required: false
         type: string
-        default: EssentialsForUnity/unity-project-check
+        default: EssentialsForUnity/workflow-unity-project
       checker-ref:
         description: Ref to check out for the checker implementation.
         required: false

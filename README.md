@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   structure:
-    uses: EssentialsForUnity/unity-project-check/.github/workflows/unity-project-check.yml@main
+    uses: EssentialsForUnity/workflow-unity-project/.github/workflows/unity-project-check.yml@main
 ```
 
 You can also call the action directly when you want normal action-style version pinning:
@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Unity project check
-        uses: EssentialsForUnity/unity-project-check@main
+        uses: EssentialsForUnity/workflow-unity-project@main
 ```
 
 Optional inputs:
@@ -54,7 +54,7 @@ Optional inputs:
 ```yaml
 jobs:
   structure:
-    uses: EssentialsForUnity/unity-project-check/.github/workflows/unity-project-check.yml@main
+    uses: EssentialsForUnity/workflow-unity-project/.github/workflows/unity-project-check.yml@main
     with:
       path: .
       require-assets: true
@@ -65,7 +65,7 @@ jobs:
       check-gitignore: true
       check-large-files: true
       max-file-size-mb: 100
-      checker-repository: EssentialsForUnity/unity-project-check
+      checker-repository: EssentialsForUnity/workflow-unity-project
       checker-ref: main
 ```
 
